@@ -3,6 +3,9 @@ package com.electonic.store.ElectonicStore.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -21,5 +24,7 @@ public class Category {
     @Column(name = "category_description", length = 600)
     private String description;
     private String coverImage;
+    @OneToMany(mappedBy = "category",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    private List<Product> products = new ArrayList<>();
 
 }

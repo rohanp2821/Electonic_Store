@@ -12,12 +12,18 @@ import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,6 +37,8 @@ public class CategoryServiceImpl implements CatetgoryService {
 
     @Autowired
     private ModelMapper mapper;
+    @Value("$(category.cover.image-path)")
+    private String imagePath;
 
 
     private Logger logger = LoggerFactory.getLogger(CategoryServiceImpl.class);
@@ -87,6 +95,18 @@ public class CategoryServiceImpl implements CatetgoryService {
     public void deleteCategory(String id) {
         //get category of given id
         Category category = categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Category not found with given id !!"));
+
+        String fullPath = imagePath + category.getCoverImage();
+
+        try {
+            Path path = Paths.get(fullPath);
+            Files.delete(path);
+        } catch (NoSuchFileException exception) {
+            logger.info("No such user image found by this id");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         categoryRepository.delete(category);
 
     }

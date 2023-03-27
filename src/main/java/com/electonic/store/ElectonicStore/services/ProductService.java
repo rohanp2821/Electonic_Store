@@ -3,6 +3,7 @@ package com.electonic.store.ElectonicStore.services;
 import com.electonic.store.ElectonicStore.dtos.ApiResponceMessage;
 import com.electonic.store.ElectonicStore.dtos.PageableResponse;
 import com.electonic.store.ElectonicStore.dtos.ProductDto;
+import com.electonic.store.ElectonicStore.entities.Category;
 import org.springframework.data.annotation.CreatedBy;
 
 import java.util.List;
@@ -30,6 +31,17 @@ public interface ProductService {
 
     // Search Product
     PageableResponse<ProductDto> searchProductByKeyword (String keyword, int pageNumber, int pageSize, String sortBy, String sortDir);
+
+    // Create product with category ID
+    ProductDto createProductWithCategory (ProductDto productDto, String categoryId);
+
+
+    // Update Category with reference of product ID
+    ProductDto updateCategoryOfProduct (String productId, String categoryId);
+
+    // Get All category product
+    PageableResponse<ProductDto> getAllCategoryProduct(String categoryId, int pageNumber, int pageSize, String sortBy, String sortDir);
+
     // Other Method
 
 
