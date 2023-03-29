@@ -9,20 +9,18 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Entity
-public class CartItem {
+@Table(name = "order_items")
+public class OrderItems {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int cartId;
-    @OneToOne
-    private Product product;
-    @JoinColumn(name = "product_id")
+    private int orderItemId;
     private int quantity;
     private int totalPrice;
-
-    // Mapping cart
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "category_id")
-    private Cart cart;
-
+    @OneToOne
+    @JoinColumn(name = "product_id")
+    private Product product;
+    @ManyToOne
+    @JoinColumn(name = "order_id")
+    private Order order;
 }

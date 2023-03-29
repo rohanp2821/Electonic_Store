@@ -14,6 +14,8 @@ import com.electonic.store.ElectonicStore.repositories.ProductRepository;
 import com.electonic.store.ElectonicStore.repositories.UserRepository;
 import com.electonic.store.ElectonicStore.services.CartService;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +40,8 @@ public class CartServiceImpl implements CartService {
     @Autowired
     private ModelMapper mapper;
 
+    private Logger logger = LoggerFactory.getLogger(CartServiceImpl.class);
+
     @Override
     public CartDto addItemToCart(String userId, AddItemToCartRequest request) {
 
@@ -50,7 +54,7 @@ public class CartServiceImpl implements CartService {
 
         Product product = productRepository.findById(productId).orElseThrow(() -> new ResourceNotFoundException("Product not found with this ID !!"));
         User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found with this ID !!"));
-        Cart cart;
+        Cart cart= null;
 
         try {
             cart = cartRepository.findByUser(user).get();
@@ -61,30 +65,36 @@ public class CartServiceImpl implements CartService {
         }
         AtomicReference<Boolean> updated = new AtomicReference<>(false);
         List<CartItem> items = cart.getItems();
-        List<CartItem> updatedItems = items.stream().map(item -> {
+        items = items.stream().map(item -> {
 
             if (item.getProduct().getProductId().equals(productId)) {
                 // items already present in cart
                 item.setQuantity(quantity);
                 item.setTotalPrice(quantity*product.getDiscountedPrice());
+                logger.info("Total Quantity : {}", item.getQuantity());
+                logger.info("Total Price : {}", item.getTotalPrice());
                 updated.set(true);
             }
             return item;
         }).collect(Collectors.toList());
-        cart.setItems(updatedItems);
-
+//        cart.setItems(updatedItems);
         if (!updated.get()) {
             CartItem cartItem = CartItem.builder()
                     .quantity(quantity)
                     .totalPrice(quantity * product.getDiscountedPrice())
                     .cart(cart)
                     .product(product).build();
-            cart.getItems().add(cartItem);
+            boolean add = cart.getItems().add(cartItem);
+            logger.info("Total Quantity : {}", cartItem.getQuantity());
+            logger.info("Total Price : {}", cartItem.getTotalPrice());
+            logger.info("Status : {}", add);
+
         }
         cart.setUser(user);
-        Cart updatedCart = cartRepository.save(cart);
+        Cart save = cartRepository.save(cart);
+        logger.info("Save entity : {}", save);
 
-        return mapper.map(updatedCart,CartDto.class);
+        return mapper.map(save,CartDto.class);
 
     }
 
